@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Cricket Predictor (Final)</title>
+    <title>AI Cricket Predictor (Tool Fix)</title>
     <!-- Telegram Web App SDK and Tailwind CSS for mobile-first design -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -138,7 +138,7 @@
         };
 
         // --- GEMINI API CALL UTILITY ---
-        // MANDATORY: API_KEY ko khali rakha gaya hai. Canvas ise run time par inject karega.
+        // API_KEY ko khali rakha gaya hai. Canvas ise run time par inject karega.
         const API_KEY = "AIzaSyCtcUXO75GiuGEYp8WwhWqq0h4Cqi1X18E"; 
         const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${API_KEY}`;
         
@@ -149,10 +149,8 @@
             
             while (attempt < maxRetries) {
                 try {
-                    // Critical check: Agar Canvas key inject nahi kar paya toh turant error do
-                    if (API_KEY === "" || API_KEY.startsWith("AIzaSy") === false) {
-                        // Agar yeh code bahar chala toh 'API Key Invalid' message dikha dega
-                        // Magar Canvas mein chalne par yeh condition skip ho jayegi
+                    // API_KEY check
+                    if (API_KEY === "" || API_KEY.startsWith("AIzaSyCtcUXO75GiuGEYp8WwhWqq0h4Cqi1X18E") === false) {
                         console.warn("API Key is missing or default. Relying on Canvas injection.");
                     }
                     
@@ -163,14 +161,19 @@
                     });
 
                     if (fetchResponse.status === 401) {
-                        // Agar 401 Unauthorized mila (API Key issue), toh turant error throw karo
                         throw new Error("401 Unauthorized: Aapki API Key invalid hai. Canvas environment key inject nahi kar paya. Kripya Canvas ko refresh karein.");
                     }
 
                     if (!fetchResponse.ok) {
                         let errorDetail = await fetchResponse.text();
-                        try { errorDetail = JSON.parse(errorDetail).error.message; } catch (e) { /* Fallback to raw text */ }
-                        throw new Error(`HTTP error! status: ${fetchResponse.status}. Detail: ${errorDetail.substring(0, 100)}...`);
+                        let errorMessage = `HTTP error! status: ${fetchResponse.status}.`;
+                        try { 
+                             const errorJson = JSON.parse(errorDetail);
+                             errorMessage += ` Detail: ${errorJson.error.message.substring(0, 100)}...`;
+                        } catch (e) { 
+                             errorMessage += ` Raw response: ${errorDetail.substring(0, 50)}...`; 
+                        }
+                        throw new Error(errorMessage);
                     }
 
                     return fetchResponse.json(); 
@@ -219,7 +222,8 @@
 
             const payload = {
                 contents: [{ parts: [{ text: userQuery }] }],
-                tools: [{ "google_search": { "queries": searchQueries } }],
+                // **** GOOGLE SEARCH TOOL FIX ****
+                tools: [{ "googleSearch": {} }], // Correct Tool definition
                 systemInstruction: { parts: [{ text: systemPrompt }] },
                 generationConfig: {
                     responseMimeType: "application/json",
@@ -304,16 +308,13 @@
 
             } catch (error) {
                 console.error("Error fetching or parsing match list:", error);
-                 // Display the specific 401 error message for user clarity
-                 if (error.message.includes("401 Unauthorized")) {
-                     listContainer.innerHTML = `<div class="p-4 rounded-lg bg-red-900 border border-red-400">
-                                                <p class="text-center text-xl font-bold text-red-300">🚨 API KEY ERROR (401)</p>
-                                                <p class="text-center text-sm text-red-200 mt-2">Yeh error Canvas environment mein key inject na hone se aata hai. Kripya browser ya app ko **Refresh** karein aur dobara **Preview** button dabayein.</p>
-                                                <p class="text-center text-xs text-red-500 mt-2">Detail: ${error.message}</p>
-                                                </div>`;
-                 } else {
-                     listContainer.innerHTML = `<p class="text-center text-sm text-red-400">🚨 Match list load nahi ho saki. **Error:** ${error.message}. Kripya dobara try karein.</p>`;
-                 }
+                 // Display the specific error message for user clarity
+                 const errorMessageDiv = `<div class="p-4 rounded-lg bg-red-900 border border-red-400">
+                                            <p class="text-center text-xl font-bold text-red-300">🚨 API/TOOL ERROR</p>
+                                            <p class="text-center text-sm text-red-200 mt-2">Data load nahi ho saka. Yeh tool ya server ki galti hai. Kripya **Refresh** karein.</p>
+                                            <p class="text-center text-xs text-red-500 mt-2">Detail: ${error.message}</p>
+                                          </div>`;
+                listContainer.innerHTML = errorMessageDiv;
             }
         }
         
@@ -375,11 +376,12 @@
             Apne analysis mein Google Search se current aur accurate data ka use karein.`;
 
             const userQuery = `Match: ${query}. Detailed betting analysis report do, jismein pitch, toss, key battles, aur score range ho.`;
-            const searchQueries = [query, `Cricket match report for ${query}`, `${query} betting prediction`];
+            // Search queries are not needed in the payload when using the auto-grounding feature
             
             const payload = {
                 contents: [{ parts: [{ text: userQuery }] }],
-                tools: [{ "google_search": { "queries": searchQueries } }],
+                // **** GOOGLE SEARCH TOOL FIX ****
+                tools: [{ "googleSearch": {} }],
                 systemInstruction: { parts: [{ text: systemPrompt }] },
                 generationConfig: {
                     responseMimeType: "application/json",
@@ -439,15 +441,13 @@
             } catch (error) {
                 console.error("Prediction Error:", error);
                 
-                if (error.message.includes("401 Unauthorized")) {
-                     document.getElementById('result-area').innerHTML = `<div class="p-4 rounded-lg bg-red-900 border border-red-400">
-                                                <p class="text-center text-xl font-bold text-red-300">🚨 API KEY ERROR (401)</p>
-                                                <p class="text-center text-sm text-red-200 mt-2">Yeh error Canvas environment mein key inject na hone se aata hai. Kripya browser ya app ko **Refresh** karein aur dobara **Preview** button dabayein.</p>
-                                                <p class="text-center text-xs text-red-500 mt-2">Detail: ${error.message}</p>
-                                                </div>`;
-                } else {
-                    displayMessage(`Prediction failed: ${error.message}. Kripya dobara try karein.`, 'error');
-                }
+                const errorMessageDiv = `<div class="p-4 rounded-lg bg-red-900 border border-red-400">
+                                            <p class="text-center text-xl font-bold text-red-300">🚨 PREDICTION FAILED</p>
+                                            <p class="text-center text-sm text-red-200 mt-2">Report generate nahi ho saki. Internet ya server issue.</p>
+                                            <p class="text-center text-xs text-red-500 mt-2">Detail: ${error.message}</p>
+                                          </div>`;
+                document.getElementById('result-area').innerHTML = errorMessageDiv;
+
             }
 
             // UI State: Finished
