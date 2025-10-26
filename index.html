@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Cricket Predictor (Mini App)</title>
+    <title>AI Cricket Predictor (Final)</title>
     <!-- Telegram Web App SDK and Tailwind CSS for mobile-first design -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -23,7 +23,7 @@
             border-radius: 0.75rem; /* rounded-xl equivalent */
         }
         .header-main {
-            color: #f97316; /* Orange for professionalism */
+            color: #10b981; /* Green for Free/Open */
         }
         .btn-predict {
             background-color: #ef4444; /* Red for Call to Action */
@@ -48,7 +48,7 @@
         .match-item {
             cursor: pointer;
             transition: background-color 0.1s;
-            border-left: 5px solid #10b981; /* Green indicator */
+            border-left: 5px solid #3b82f6; /* Blue indicator */
         }
         .match-item:hover {
              background-color: #4b5563;
@@ -62,34 +62,13 @@
             color: #f97316; /* Orange highlight */
             font-weight: 700;
         }
-        .money-link {
-            background-color: #0d9488; /* Teal for money link */
+        .affiliate-link {
+            background-color: #0d9488; /* Teal for partner link */
             transition: all 0.2s ease;
         }
-        .money-link:hover {
+        .affiliate-link:hover {
             background-color: #0f766e;
             transform: scale(1.02);
-        }
-        /* Style for the copy button */
-        .copy-btn {
-            background-color: #2563eb;
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 0.5rem;
-            font-weight: bold;
-            transition: background-color 0.2s;
-        }
-        .copy-btn:hover {
-            background-color: #1d4ed8;
-        }
-        .premium-feature {
-            background-color: #5b21b6; /* Violet background for premium */
-            color: #d8b4fe;
-            padding: 0.25rem 0.5rem;
-            border-radius: 0.375rem;
-            font-weight: bold;
-            font-size: 0.75rem;
-            margin-left: 0.5rem;
         }
     </style>
 </head>
@@ -97,25 +76,20 @@
 
     <!-- Header -->
     <header class="w-full max-w-lg mb-6 text-center">
-        <h1 class="text-3xl font-extrabold header-main mb-2">🏏 CRICKET AI PREDICTOR </h1>
-        <p class="text-gray-400">Deep statistical analysis aur winning odds.</p>
+        <h1 class="text-3xl font-extrabold header-main mb-2">🏏 CRICKET AI PREDICTOR (FREE)</h1>
+        <p class="text-gray-400">Deep statistical analysis, koi login nahi, sab free.</p>
     </header>
 
     <!-- Main Content Card -->
     <div id="app-container" class="w-full max-w-lg card p-6">
         
-        <!-- User ID Display (Firestore requirement) -->
-        <div id="user-info" class="text-xs text-center p-2 mb-4 rounded-lg" style="background-color: var(--tg-theme-secondary-bg-color);">
-            <p>Aapki User ID: <span id="user-id-span" class="font-mono text-yellow-400 break-all">Connecting...</span></p>
+        <!-- App Status Bar -->
+        <div id="status-bar" class="text-center p-2 mb-4 rounded-lg text-sm font-semibold bg-blue-700 text-blue-200">
+            ✅ App Ready. Match data load ho raha hai...
         </div>
 
-        <!-- App Status Bar (To show connection status) -->
-        <div id="auth-status-bar" class="text-center p-2 mb-4 rounded-lg text-sm font-semibold bg-blue-700 text-blue-200">
-            Server se jud raha hai...
-        </div>
-
-        <!-- Today's Matches List Section (FREE TIER - Trust Builder) -->
-        <h2 class="text-lg font-bold mb-3 text-green-400">✅ Aaj Ke Matches (Quick Odds)</h2>
+        <!-- Today's Matches List Section -->
+        <h2 class="text-lg font-bold mb-3 text-green-400">🔥 Aaj Ke Live Matches (Data Google se)</h2>
         <div id="today-matches-list" class="space-y-3 mb-6">
             <!-- Matches and loading status will be displayed here -->
             <p id="match-list-status" class="text-center text-sm text-gray-400">Matches ki live list load ho rahi hai, please wait...</p>
@@ -128,10 +102,10 @@
                    placeholder="e.g., India vs Pakistan 2nd T20I" aria-label="Enter Match Details">
             
             <button id="predict-button" class="btn-predict w-full p-3 text-lg font-extrabold rounded-lg flex items-center justify-center" onclick="handlePrediction()">
-                <span id="button-text">🚀 Detailed Analysis Generate Karein</span>
+                <span id="button-text">🚀 Detailed Analysis Generate Karein (FREE)</span>
                 <div id="loading-spinner" class="w-5 h-5 border-4 rounded-full spinner animate-spin ml-2 hidden"></div>
             </button>
-            <p id="trial-info" class="text-center text-sm text-yellow-400 mt-2">Loading...</p>
+            <p class="text-center text-sm text-yellow-400 mt-2">Yeh service hamesha free rahegi.</p>
         </div>
 
         <!-- Result Section -->
@@ -141,221 +115,31 @@
         
     </div>
 
-    <!-- Modal for Premium Access -->
-    <div id="premium-modal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50 hidden">
-        <div class="card p-6 w-full max-w-md">
-            <h3 class="text-2xl font-extrabold text-pink-400 mb-4">🔑 PREMIUM ACCESS REQUIRED</h3>
-            <p class="text-gray-300 mb-4">Aapne apna **Free Trial** use kar liya hai. Complete Pitch Report, Key Battles, aur Toss Decision Prediction unlock karne ke liye **₹99/month** ka subscription lein.</p>
-            
-            <div class="bg-gray-700 p-4 rounded-lg mb-4">
-                <p class="font-bold text-gray-400 mb-2">Manual Payment (UPI)</p>
-                <div class="flex justify-between items-center">
-                    <span id="upi-id-display" class="text-yellow-400 text-xl font-mono select-all">Muahshi7759@ybl</span>
-                    <button class="copy-btn" onclick="copyUpiId(document.getElementById('upi-id-display').textContent)">Copy ID</button>
-                </div>
-            </div>
 
-            <p class="text-sm text-gray-400 mb-6">Payment ₹99 karne ke baad neeche diye gaye button par click karein.</p>
-            
-            <button class="w-full p-3 bg-green-600 hover:bg-green-700 font-extrabold rounded-lg text-white mb-3" onclick="handlePaymentDone()">
-                ✔️ I Have Paid (Access Activate Karein)
-            </button>
-            <button class="w-full p-3 bg-gray-600 hover:bg-gray-700 font-extrabold rounded-lg text-gray-300" onclick="hidePremiumModal()">
-                Cancel
-            </button>
-        </div>
-    </div>
-
-
-    <!-- Firebase and Logic Script -->
+    <!-- Logic Script -->
     <script type="module">
-        // --- Firebase Modular Imports ---
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, setLogLevel, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        
+        // --- CONFIGURATION ---
+        const AFFILIATE_LINK = "https://your-betting-platform.com"; 
+        const TELEGRAM_LINK = "https://t.me/your_telegram_channel"; 
 
-        // --- CONFIGURATION (UPI ID AUR LINKS APKE HISAB SE) ---
-        const UPI_ID = "Muahshi7759@ybl"; // UPI ID for payment
-        const PREMIUM_TELEGRAM_LINK = "https://t.me/your_premium_group"; // Your Telegram Group Link
-        const AFFILIATE_LINK = "https://your-betting-platform.com"; // Your Betting Platform Link
-
-        // --- MANDATORY CANVAS GLOBALS (GitHub par yeh kaam nahi karte, isliye inko check karna zaroori hai) ---
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-
-        // ******** IMPORTANT FIX FOR GITHUB DEPLOYMENT ********
-        // Firebase Config ko yahan direct daal diya gaya hai.
-        // Ye config aapke Firebase project se li gayi hai.
-        const firebaseConfig = {
-            apiKey: "AIzaSyCtdx075giuGEYp8wHHWqqOh4CqI1X18E",
-            authDomain: "muahshi-digital-ai.firebaseapp.com",
-            projectId: "muahshi-digital-ai",
-            storageBucket: "muahshi-digital-ai.appspot.com",
-            messagingSenderId: "1050284799052",
-            appId: "1:1050284799052:web:34cc18046ecf0dfa87c374",
-            measurementId: "G-HWCW2Q535S"
-        };
-        // ******** END OF FIX ********
-
-        let db, auth;
-        let userId = null; // Set in onAuthStateChanged
-        let isAuthReady = false;
-        let userStats = { freeCount: 0, isPremium: false }; // Tracks user status
-
-        // Expose functions to the global scope so HTML can call them
         window.handlePrediction = handlePrediction;
-        window.copyUpiId = copyUpiId;
-        window.hidePremiumModal = hidePremiumModal;
-        window.handlePaymentDone = handlePaymentDone;
 
         // --- TELEGRAM INIT ---
         window.onload = function() {
             if (window.Telegram && Telegram.WebApp) {
                 Telegram.WebApp.ready();
                 Telegram.WebApp.expand(); 
-                // Set theme colors from Telegram
                 if (Telegram.WebApp.themeParams) {
                     document.body.style.backgroundColor = Telegram.WebApp.themeParams.bg_color;
                 }
             }
-            // Update UPI ID in the Modal
-            document.getElementById('upi-id-display').textContent = UPI_ID;
-            
-            // Initiate Firebase setup
-            setupFirebase();
+            fetchTodayMatches();
         };
 
-        // --- FIREBASE INIT AND AUTH SETUP ---
-        function setupFirebase() {
-            const statusBar = document.getElementById('auth-status-bar');
-            
-            // Ab hum direct firebaseConfig variable ko check karenge
-            if (!firebaseConfig || !firebaseConfig.apiKey) {
-                 console.error("Firebase config missing or incomplete. Cannot initialize Firestore/Auth.");
-                 statusBar.textContent = "❌ ERROR: Firebase Config Missing. (Check index.html)";
-                 statusBar.className = "text-center p-2 mb-4 rounded-lg text-sm font-semibold bg-red-700 text-red-200";
-                 return;
-            }
-            
-            setLogLevel('Debug'); // Enable logs for debugging
-            const app = initializeApp(firebaseConfig);
-            db = getFirestore(app);
-            auth = getAuth(app);
-            
-            // 1. Authentication
-            async function authenticate() {
-                try {
-                    if (initialAuthToken) {
-                        // Agar Canvas se token mila, toh custom sign-in
-                        await signInWithCustomToken(auth, initialAuthToken);
-                    } else {
-                        // Agar GitHub Pages ya normal web par hai, toh anonymous sign-in
-                        await signInAnonymously(auth);
-                    }
-                } catch (error) {
-                    console.error("Authentication failed, falling back to anonymous sign-in:", error);
-                    // Critical fallback if custom token fails
-                    await signInAnonymously(auth); 
-                }
-            }
-
-            // 2. Auth State Listener
-            onAuthStateChanged(auth, async (user) => {
-                isAuthReady = true;
-                if (user) {
-                    userId = user.uid; // Set User ID
-                    
-                    const userIdSpan = document.getElementById('user-id-span');
-                    if (userIdSpan) {
-                        userIdSpan.textContent = userId;
-                        // user-info div ko visible karna, ab yeh default mein visible hai, text change ho gaya hai
-                    }
-                    
-                    // Load user stats only after successful sign-in
-                    await loadUserStats(user.uid);
-                    
-                    // --- STATUS UPDATE: READY ---
-                    if (statusBar) {
-                        statusBar.textContent = "✅ App Ready. Shuru karein!";
-                        statusBar.className = "text-center p-2 mb-4 rounded-lg text-sm font-semibold bg-green-700 text-green-200";
-                    }
-
-                    // Auth ready hone ke baad matches fetch karna
-                    fetchTodayMatches();
-                } else {
-                    // This state should ideally not happen if signInAnonymously succeeds.
-                    userId = crypto.randomUUID(); 
-                    console.error("Auth state changed to unauthenticated, using random UUID.");
-                    
-                     if (statusBar) {
-                        statusBar.textContent = "⚠️ User login failed, trying again...";
-                    }
-                    await authenticate(); // Retry authentication
-                }
-                updateTrialInfo();
-            });
-            
-            authenticate(); // Start authentication flow
-        }
-        
-        // --- FIRESTORE USER STATS ---
-        async function loadUserStats(currentUserId) {
-            if (!db || !currentUserId) return; 
-            try {
-                // Path: /artifacts/{appId}/users/{userId}/stats
-                const userDocRef = doc(db, `artifacts/${appId}/users/${currentUserId}`, 'stats');
-                const docSnap = await getDoc(userDocRef);
-                
-                if (docSnap.exists()) {
-                    userStats = docSnap.data();
-                    userStats.freeCount = userStats.freeCount || 0;
-                    userStats.isPremium = userStats.isPremium || false;
-                } else {
-                    // Agar document nahi hai toh naya banao
-                    await setDoc(userDocRef, userStats);
-                }
-                updateTrialInfo();
-            } catch(e) {
-                console.error("Error loading user stats:", e);
-                // Configuration error ko UI mein dikhana
-                document.getElementById('auth-status-bar').textContent = `❌ ERROR: Firestore Data Error. ${e.message.substring(0, 50)}...`;
-                document.getElementById('auth-status-bar').className = "text-center p-2 mb-4 rounded-lg text-sm font-semibold bg-red-700 text-red-200";
-            }
-        }
-
-        async function incrementFreeCount() {
-            if (!db || !userId) return;
-            userStats.freeCount += 1;
-            try {
-                const userDocRef = doc(db, `artifacts/${appId}/users/${userId}`, 'stats');
-                // Counter update karna
-                await updateDoc(userDocRef, { 
-                    freeCount: userStats.freeCount,
-                    lastPrediction: new Date().toISOString()
-                });
-            } catch(e) {
-                console.error("Error updating free count:", e);
-            }
-            updateTrialInfo();
-        }
-        
-        function updateTrialInfo() {
-            const infoElement = document.getElementById('trial-info');
-            if (userStats.isPremium) {
-                infoElement.textContent = "👑 Aapka Premium Access Active Hai! Unlimited Reports.";
-                infoElement.className = "text-center text-sm font-bold text-pink-400 mt-2";
-            } else if (userStats.freeCount < 1) {
-                infoElement.textContent = "🎁 Pehla Detailed Analysis FREE Hai!";
-                infoElement.className = "text-center text-sm font-bold text-green-400 mt-2";
-            } else {
-                 infoElement.textContent = "🔑 FREE TRIAL USED. Next Detailed Report ke liye Premium Access lein.";
-                 infoElement.className = "text-center text-sm font-bold text-red-400 mt-2";
-            }
-        }
-
-
-        // --- GEMINI API CALL UTILITY (DO NOT CHANGE API KEY) ---
-        const API_KEY = ""; // Key is provided by Canvas runtime
+        // --- GEMINI API CALL UTILITY ---
+        // MANDATORY: API_KEY ko khali rakha gaya hai. Canvas ise run time par inject karega.
+        const API_KEY = ""; 
         const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${API_KEY}`;
         
         async function fetchWithRetry(payload) {
@@ -365,6 +149,13 @@
             
             while (attempt < maxRetries) {
                 try {
+                    // Critical check: Agar Canvas key inject nahi kar paya toh turant error do
+                    if (API_KEY === "" || API_KEY.startsWith("AIzaSy") === false) {
+                        // Agar yeh code bahar chala toh 'API Key Invalid' message dikha dega
+                        // Magar Canvas mein chalne par yeh condition skip ho jayegi
+                        console.warn("API Key is missing or default. Relying on Canvas injection.");
+                    }
+                    
                     const fetchResponse = await fetch(API_URL, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -372,15 +163,8 @@
                     });
 
                     if (fetchResponse.status === 401) {
-                         // 401: Unauthorized (API Key Issue) - This is the error from the screenshot
-                        throw new Error("401 Unauthorized. API Key Invalid/Missing. Kripya app refresh karein.");
-                    }
-
-                    if (fetchResponse.status === 429) {
-                        attempt++;
-                        const delay = Math.pow(2, attempt) * 1000 + Math.random() * 500; 
-                        await new Promise(resolve => setTimeout(resolve, delay));
-                        continue;
+                        // Agar 401 Unauthorized mila (API Key issue), toh turant error throw karo
+                        throw new Error("401 Unauthorized: Aapki API Key invalid hai. Canvas environment key inject nahi kar paya. Kripya Canvas ko refresh karein.");
                     }
 
                     if (!fetchResponse.ok) {
@@ -392,9 +176,11 @@
                     return fetchResponse.json(); 
 
                 } catch (error) {
+                    // 401 error ya last attempt par error throw kar dena hai
                     if (error.message.includes("401 Unauthorized") || attempt === maxRetries - 1) {
                         throw error;
                     }
+                    
                     attempt++;
                     const delay = Math.pow(2, attempt) * 1000 + Math.random() * 500; 
                     await new Promise(resolve => setTimeout(resolve, delay));
@@ -405,12 +191,8 @@
         }
 
 
-        // --- MATCH LIST FETCH (FREE TIER - Trust Builder) ---
+        // --- MATCH LIST FETCH ---
         async function fetchTodayMatches() {
-            if (!isAuthReady || !db) {
-                console.warn("Auth not ready or DB not initialized, skipping match fetch.");
-                return;
-            }
             
             const listContainer = document.getElementById('today-matches-list');
             const statusMessage = document.getElementById('match-list-status');
@@ -433,9 +215,11 @@
 
             const userQuery = "Aaj ke saare cricket matches, unki winning percentage, kon jeetega aur pitch/venue ka 1-line teaser batao.";
             
+            const searchQueries = ["Today's cricket matches quick prediction", "Aaj ke cricket matches ki bhavishyavani"];
+
             const payload = {
                 contents: [{ parts: [{ text: userQuery }] }],
-                tools: [{ "google_search": {} }],
+                tools: [{ "google_search": { "queries": searchQueries } }],
                 systemInstruction: { parts: [{ text: systemPrompt }] },
                 generationConfig: {
                     responseMimeType: "application/json",
@@ -468,7 +252,7 @@
                 try {
                     matchesData = JSON.parse(jsonText);
                 } catch (e) {
-                    listContainer.innerHTML = `<p class="text-center text-sm text-yellow-400">🚨 Data format mein error. Shayad Gemini ne JSON ke bahar kuch likh diya. Response: ${jsonText.substring(0, 150)}...</p>`;
+                    listContainer.innerHTML = `<p class="text-center text-sm text-yellow-400">🚨 Data format mein error. Response: ${jsonText.substring(0, 150)}...</p>`;
                     return;
                 }
                 
@@ -483,7 +267,6 @@
                     const matchItem = document.createElement('div');
                     matchItem.className = 'match-item card p-3 flex flex-col space-y-2';
                     matchItem.setAttribute('data-match-name', match.matchName);
-                    // On click, fill the input and start prediction
                     matchItem.onclick = () => handlePrediction(match.matchName); 
 
                     const winningTeam = match.winnerTeam || 'N/A';
@@ -515,25 +298,27 @@
 
                 const instruction = document.createElement('p');
                 instruction.className = 'text-center text-xs text-gray-500 mt-2';
-                instruction.textContent = 'Full betting report (Pitch, Key Battles, Toss) ke liye, match par TAP karein.';
+                instruction.textContent = 'Full Betting Report (Pitch, Key Battles, Toss) ke liye, match par TAP karein.';
                 listContainer.appendChild(instruction);
 
 
             } catch (error) {
                 console.error("Error fetching or parsing match list:", error);
-                 listContainer.innerHTML = `<p class="text-center text-sm text-red-400">🚨 Match list load nahi ho saki. **API Error:** ${error.message}. Kripya app refresh karein.</p>`;
+                 // Display the specific 401 error message for user clarity
+                 if (error.message.includes("401 Unauthorized")) {
+                     listContainer.innerHTML = `<div class="p-4 rounded-lg bg-red-900 border border-red-400">
+                                                <p class="text-center text-xl font-bold text-red-300">🚨 API KEY ERROR (401)</p>
+                                                <p class="text-center text-sm text-red-200 mt-2">Yeh error Canvas environment mein key inject na hone se aata hai. Kripya browser ya app ko **Refresh** karein aur dobara **Preview** button dabayein.</p>
+                                                <p class="text-center text-xs text-red-500 mt-2">Detail: ${error.message}</p>
+                                                </div>`;
+                 } else {
+                     listContainer.innerHTML = `<p class="text-center text-sm text-red-400">🚨 Match list load nahi ho saki. **Error:** ${error.message}. Kripya dobara try karein.</p>`;
+                 }
             }
         }
         
         // --- GATEWAY FUNCTION ---
-        async function handlePrediction(matchNameFromList = null) {
-            
-            // Re-check Auth status
-            if (!isAuthReady || !auth.currentUser) {
-                displayMessage("Server abhi connect ho raha hai ya aap authenticated nahi hain. Please 3-5 seconds wait karke dobara click karein.", 'error');
-                // Force a delay or retry mechanism if needed, but a message is usually enough for the user to wait.
-                return;
-            }
+        function handlePrediction(matchNameFromList = null) {
 
             const queryInput = document.getElementById('match-query');
             let query;
@@ -550,96 +335,10 @@
                 return;
             }
             
-            // Latest stats load karna
-            await loadUserStats(userId); 
-
-            // --- MONETIZATION LOGIC: Free Trial ---
-            // Pehla prediction free (freeCount < 1)
-            if (!userStats.isPremium && userStats.freeCount >= 1) {
-                showPremiumModal(query); // 1 free analysis ke baad payment gate dikhana
-                return;
-            }
-            
             runPrediction(query);
         }
         
-        // --- MODAL AND PREMIUM FUNCTIONS ---
-        function showPremiumModal(matchQuery) {
-            document.getElementById('premium-modal').classList.remove('hidden');
-            document.getElementById('predict-button').setAttribute('data-query', matchQuery); 
-            // Telegram web app alert
-            if (window.Telegram && Telegram.WebApp) {
-                Telegram.WebApp.showAlert("PREMIUM ACCESS: Pehla trial use ho chuka hai. Detailed Report ke liye payment karein.");
-            }
-        }
-
-        function hidePremiumModal() {
-            document.getElementById('premium-modal').classList.add('hidden');
-        }
-
-        function copyUpiId(upiId) {
-            // Copy to clipboard
-            if (navigator.clipboard) {
-                 navigator.clipboard.writeText(upiId).then(() => {
-                    displayMessage("UPI ID Copy ho gayi: " + upiId, 'success');
-                 }).catch(err => {
-                    // Fallback using execCommand
-                    fallbackCopyTextToClipboard(upiId);
-                 });
-            } else {
-                 fallbackCopyTextToClipboard(upiId);
-            }
-        }
-        
-        function fallbackCopyTextToClipboard(text) {
-            const el = document.createElement('textarea');
-            el.value = text;
-            el.setAttribute('readonly', '');
-            el.style.position = 'absolute';
-            el.style.left = '-9999px';
-            document.body.appendChild(el);
-            el.select();
-            
-            let successful = false;
-            try {
-                successful = document.execCommand('copy');
-            } catch (err) {
-                console.error('Fallback: Oops, unable to copy', err);
-            }
-            document.body.removeChild(el);
-            
-            if (successful) {
-                displayMessage("UPI ID Copy ho gayi (Fallback): " + text, 'success');
-            } else {
-                displayMessage("Copy karne mein fail, kripya manually copy karein.", 'error');
-            }
-        }
-
-        async function handlePaymentDone() {
-             // In a real app, this would trigger a backend check.
-             hidePremiumModal();
-             displayMessage("Payment request received. Aapka access 24 hours mein activate ho jayega. (Demo Mode: Free trial limit ab remove ho gayi hai.)", 'info');
-             
-             // DEMO LOGIC: Since we cannot verify payment, we reset the free count for demo purposes.
-             // You should replace this with actual payment verification logic.
-             userStats.freeCount = 0;
-             userStats.isPremium = true; // Setting to true for demo
-             
-             // Optionally update Firestore after setting to premium in demo
-             if (db && userId) {
-                 try {
-                    const userDocRef = doc(db, `artifacts/${appId}/users/${userId}`, 'stats');
-                    await updateDoc(userDocRef, { isPremium: true });
-                 } catch (e) {
-                     console.error("Error updating premium status:", e);
-                 }
-             }
-
-             updateTrialInfo();
-        }
-        
-
-        // --- DETAILED ANALYSIS EXECUTION (FULL DETAILS) ---
+        // --- DETAILED ANALYSIS EXECUTION ---
         async function runPrediction(query) {
             
             const loadingSpinner = document.getElementById('loading-spinner');
@@ -676,10 +375,11 @@
             Apne analysis mein Google Search se current aur accurate data ka use karein.`;
 
             const userQuery = `Match: ${query}. Detailed betting analysis report do, jismein pitch, toss, key battles, aur score range ho.`;
+            const searchQueries = [query, `Cricket match report for ${query}`, `${query} betting prediction`];
             
             const payload = {
                 contents: [{ parts: [{ text: userQuery }] }],
-                tools: [{ "google_search": {} }],
+                tools: [{ "google_search": { "queries": searchQueries } }],
                 systemInstruction: { parts: [{ text: systemPrompt }] },
                 generationConfig: {
                     responseMimeType: "application/json",
@@ -733,22 +433,26 @@
                 }
                 
                 renderPrediction(predictionData);
-                
-                // --- Successful prediction ke baad stats update karna ---
-                if (!userStats.isPremium) { // Only increment if the user is not premium
-                    await incrementFreeCount();
-                }
 
                 displayMessage("Full Betting Report Ready! ✅", 'success');
                 
             } catch (error) {
                 console.error("Prediction Error:", error);
-                displayMessage(`Prediction failed: ${error.message}. Kripya dobara try karein.`, 'error');
+                
+                if (error.message.includes("401 Unauthorized")) {
+                     document.getElementById('result-area').innerHTML = `<div class="p-4 rounded-lg bg-red-900 border border-red-400">
+                                                <p class="text-center text-xl font-bold text-red-300">🚨 API KEY ERROR (401)</p>
+                                                <p class="text-center text-sm text-red-200 mt-2">Yeh error Canvas environment mein key inject na hone se aata hai. Kripya browser ya app ko **Refresh** karein aur dobara **Preview** button dabayein.</p>
+                                                <p class="text-center text-xs text-red-500 mt-2">Detail: ${error.message}</p>
+                                                </div>`;
+                } else {
+                    displayMessage(`Prediction failed: ${error.message}. Kripya dobara try karein.`, 'error');
+                }
             }
 
             // UI State: Finished
             loadingSpinner.classList.add('hidden');
-            buttonText.textContent = '🚀 Detailed Analysis Generate Karein';
+            buttonText.textContent = '🚀 Detailed Analysis Generate Karein (FREE)';
             predictButton.disabled = false;
         }
 
@@ -782,7 +486,6 @@
 
             if (window.Telegram && Telegram.WebApp) {
                 if (type === 'error' && !message.includes("401 Unauthorized")) {
-                    // Critical errors ke liye Telegram web app alert use karna
                     Telegram.WebApp.showAlert(`Error: ${message}`);
                 }
             }
@@ -790,7 +493,6 @@
 
         function renderPrediction(data) {
             const resultArea = document.getElementById('result-area');
-            // Purana status message hatana
             const statusMessage = document.getElementById('status-message');
             if(statusMessage) { statusMessage.remove(); }
             
@@ -798,48 +500,24 @@
 
             const winnerTeam = data.OverallWinner || 'N/A';
             
-            // Check monetization status
-            const isPremium = userStats.isPremium;
-            const isTrialRun = userStats.freeCount < 1; // Agar yeh pehla run hai toh full report milegi
-
-            let predictionLabel;
-            let winnerColor;
-            let pitchContent, tossContent, scoreContent;
-
-            if (isPremium || isTrialRun) {
-                // FULL ACCESS (Premium or First Free Trial)
-                predictionLabel = isPremium ? '👑 PREMIUM REPORT (Full Access)' : '🎁 FREE TRIAL REPORT (Abhi Tak 1 Use)';
-                winnerColor = isPremium ? 'text-pink-400' : 'text-green-400';
-                pitchContent = data.PitchReport || 'Pitch report abhi available nahi hai.';
-                tossContent = data.TossDecisionPrediction || 'N/A';
-                scoreContent = data.FirstInningsScoreRange || 'N/A';
-            } else {
-                 // ACCESS DENIED (Trial Used and Not Premium)
-                 predictionLabel = '🔑 PREMIUM ACCESS REQUIRED';
-                 winnerColor = 'text-yellow-400';
-                 pitchContent = `<span class="premium-feature">PREMIUM</span> Detailed Pitch Analysis sirf Premium mein available hai.`;
-                 tossContent = `<span class="premium-feature">PREMIUM</span> Toss Decision Prediction sirf Premium mein available hai.`;
-                 scoreContent = `<span class="premium-feature">PREMIUM</span> Expected Score Range sirf Premium mein available hai.`;
-            }
-            
             let html = `
                 <h2 class="text-2xl font-extrabold text-red-400 mb-4 section-header">${data.MatchName || 'Match Report'} - FULL BETTING REPORT</h2>
 
                 <!-- WINNER & PROBABILITY -->
                 <div class="card p-4 mb-6 border-l-4 border-green-500 shadow-xl">
-                    <p class="text-xs font-semibold text-gray-400">${predictionLabel}</p>
-                    <h3 class="text-3xl font-extrabold ${winnerColor} mt-1">${winnerTeam}</h3>
+                    <p class="text-xs font-semibold text-gray-400">✅ FREE REPORT (Koi Limit Nahi)</p>
+                    <h3 class="text-3xl font-extrabold text-green-400 mt-1">${winnerTeam}</h3>
                     <p class="text-sm mt-2 text-white">Odds: <span class="highlight-text">${data.WinningProbability || 'N/A'}</span></p>
                     <p class="text-xs text-gray-500 mt-2">Yeh prediction saare statistical factors ko dhyan mein rakhkar banayi gayi hai.</p>
                 </div>
 
-                <!-- PITCH, TOSS, SCORE (Monetization Gate) -->
+                <!-- PITCH, TOSS, SCORE (Full Free Access) -->
                 <div class="card p-4 mb-6 space-y-4">
                     <div class="border-b border-gray-600 pb-3">
                         <h4 class="font-bold text-lg text-orange-400">🏟️ PITCH & SCORE ANALYSIS</h4>
-                        <p class="text-sm mt-2 text-gray-300">${pitchContent}</p>
-                        <p class="text-sm mt-2 font-extrabold text-yellow-300">Toss Decision Suggestion: <span class="highlight-text">${tossContent}</span></p>
-                        <p class="text-sm mt-2 font-extrabold text-red-300">Expected 1st Innings Score: <span class="highlight-text">${scoreContent}</span></p>
+                        <p class="text-sm mt-2 text-gray-300">**Pitch Report:** ${data.PitchReport || 'Pitch report abhi available nahi hai.'}</p>
+                        <p class="text-sm mt-2 font-extrabold text-yellow-300">**Toss Decision Suggestion:** <span class="highlight-text">${data.TossDecisionPrediction || 'N/A'}</span></p>
+                        <p class="text-sm mt-2 font-extrabold text-red-300">**Expected 1st Innings Score:** <span class="highlight-text">${data.FirstInningsScoreRange || 'N/A'}</span></p>
                     </div>
                 </div>
                 
@@ -869,22 +547,21 @@
                 html += `</ul></div>`;
             }
 
-            // --- CALL TO ACTION / MONETIZATION SECTION (Report ke baad) ---
+            // --- CALL TO ACTION / AFFILIATE SECTION ---
             html += `
                 <h3 class="text-xl font-extrabold text-center text-orange-400 mt-8 mb-4">🏆 Aage Ki Strategy Aur Live Updates</h3>
 
                 <!-- Betting Partner Link -->
-                <a href="${AFFILIATE_LINK}" target="_blank" class="w-full inline-block p-4 rounded-xl money-link font-extrabold text-center text-white text-lg mb-4 shadow-xl transition duration-200">
+                <a href="${AFFILIATE_LINK}" target="_blank" class="w-full inline-block p-4 rounded-xl affiliate-link font-extrabold text-center text-white text-lg mb-4 shadow-xl transition duration-200">
                     💰 Is Match Par Bet Karein! (Official Partner)
                 </a>
 
                 <!-- Telegram Group Link -->
-                <a href="${PREMIUM_TELEGRAM_LINK}" target="_blank" class="w-full inline-block p-4 rounded-xl bg-blue-600 hover:bg-blue-700 font-extrabold text-center text-white text-lg transition duration-200">
+                <a href="${TELEGRAM_LINK}" target="_blank" class="w-full inline-block p-4 rounded-xl bg-blue-600 hover:bg-blue-700 font-extrabold text-center text-white text-lg transition duration-200">
                     📢 Free Tips & Live Score Updates Ke Liye Group Join Karein
                 </a>
                 <p class="text-center text-xs text-gray-500 mt-2">Sari post-toss analysis aur final report Telegram channel mein share hoti hai.</p>
             `;
-
 
             resultArea.innerHTML = html;
         }
