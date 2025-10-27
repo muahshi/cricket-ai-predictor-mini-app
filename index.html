@@ -3,549 +3,604 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Cricket Predictor (Replit Setup)</title>
-    <!-- Telegram Web App SDK and Tailwind CSS for mobile-first design -->
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <title>AI Cricket Predictor</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <!-- Inter Font and Dark Theme Styling -->
     <style>
-        /* Professional Dark Theme */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
         body {
-            /* Telegram theme colors for seamless integration */
-            background-color: var(--tg-theme-bg-color, #1f2937); /* Dark Slate Grey */
-            color: var(--tg-theme-text-color, #e5e7eb); /* Light Grey text */
             font-family: 'Inter', sans-serif;
-            transition: background-color 0.3s;
+            background-color: #0b111e; /* Deep Dark Blue */
         }
-        .card {
-            background-color: var(--tg-theme-secondary-bg-color, #374151); /* Slightly lighter card */
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-            border-radius: 0.75rem; /* rounded-xl equivalent */
+        .cricket-card {
+            background-color: #1a2230; /* Slightly lighter card background */
         }
-        .header-main {
-            color: #10b981; /* Green for Free/Open */
-        }
-        .btn-predict {
-            background-color: #ef4444; /* Red for Call to Action */
-            color: #ffffff;
-            transition: all 0.2s ease;
-        }
-        .btn-predict:hover:not(:disabled) {
-            opacity: 0.9;
-            transform: translateY(-1px);
-        }
-        input, select {
-            background-color: var(--tg-theme-secondary-bg-color, #4b5563) !important;
-            color: var(--tg-theme-text-color, #f3f4f6) !important;
-            border: 1px solid #6b7280;
-        }
-        .spinner {
-            border-top-color: #f3f4f6;
-            border-right-color: #f3f4f6;
-            border-bottom-color: transparent;
-            border-left-color: transparent;
-        }
-        .match-item {
-            cursor: pointer;
-            transition: background-color 0.1s;
-            border-left: 5px solid #3b82f6; /* Blue indicator */
-        }
-        .match-item:hover {
-             background-color: #4b5563;
-        }
-        .section-header {
-            border-bottom: 2px solid #4b5563;
-            padding-bottom: 0.5rem;
-            margin-bottom: 1rem;
-        }
-        .highlight-text {
-            color: #f97316; /* Orange highlight */
-            font-weight: 700;
-        }
-        .affiliate-link {
-            background-color: #0d9488; /* Teal for partner link */
-            transition: all 0.2s ease;
-        }
-        .affiliate-link:hover {
-            background-color: #0f766e;
-            transform: scale(1.02);
-        }
+        /* Custom scrollbar for dark theme */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #0b111e; }
+        ::-webkit-scrollbar-thumb { background: #1f3f3f; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #2c5c5c; }
     </style>
 </head>
-<body class="min-h-screen p-4 flex flex-col items-center">
+<body class="min-h-screen bg-[#0b111e] text-gray-100 p-4 pt-8">
 
-    <!-- Header -->
-    <header class="w-full max-w-lg mb-6 text-center">
-        <h1 class="text-3xl font-extrabold header-main mb-2">🏏 CRICKET AI PREDICTOR (FREE)</h1>
-        <p class="text-gray-400">Deep statistical analysis, koi login nahi, sab free.</p>
-    </header>
+    <!-- Telegram WebApp SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-    <!-- Main Content Card -->
-    <div id="app-container" class="w-full max-w-lg card p-6">
-        
-        <!-- App Status Bar -->
-        <div id="status-bar" class="text-center p-2 mb-4 rounded-lg text-sm font-semibold bg-blue-700 text-blue-200">
-            ✅ App Ready. Match data load ho raha hai...
+    <!-- Main App Container -->
+    <div id="app-container" class="max-w-xl mx-auto">
+        <h1 class="text-3xl font-extrabold text-cyan-400 mb-1 tracking-wider text-center">AI Cricket Predictor 🏏</h1>
+        <p class="text-sm text-gray-400 mb-6 text-center">Live Analysis | Betting Insights</p>
+
+        <!-- Auth Status & User ID -->
+        <div id="auth-status" class="cricket-card p-3 rounded-xl shadow-lg mb-6 text-xs break-all border border-gray-700">
+            <span class="font-semibold text-cyan-500">Status:</span> <span id="auth-message">Initializing...</span>
+            <br>
+            <span class="font-semibold text-cyan-500">User ID:</span> <span id="user-id">Loading...</span>
         </div>
 
-        <!-- Today's Matches List Section -->
-        <h2 class="text-lg font-bold mb-3 text-green-400">🔥 Aaj Ke Live Matches (Data Google se)</h2>
-        <div id="today-matches-list" class="space-y-3 mb-6">
-            <!-- Matches and loading status will be displayed here -->
-            <p id="match-list-status" class="text-center text-sm text-gray-400">Matches ki live list load ho rahi hai, please wait...</p>
+        <!-- Status Message Area -->
+        <div id="status-display" class="p-3 mb-6 hidden rounded-xl text-sm transition-all duration-300 shadow-md"></div>
+
+        <!-- Tier 1: Match Listing -->
+        <h2 class="text-xl font-bold text-white mb-4 border-l-4 border-cyan-400 pl-2">Aaj Ke Major Fixtures</h2>
+        <div id="match-list-container" class="space-y-3 mb-8">
+            <p id="match-list-loading" class="text-gray-400 text-center">Loading matches...</p>
         </div>
 
-        <!-- Input Section for detailed analysis -->
-        <div class="space-y-4 pt-4 border-t border-gray-700">
-            <label for="match-query" class="block text-sm font-medium text-gray-300">Detailed Report ke liye Match ka naam enter karein:</label>
-            <input type="text" id="match-query" class="w-full p-3 rounded-lg border-none focus:ring-2 focus:ring-red-500" 
-                   placeholder="e.g., India vs Pakistan 2nd T20I" aria-label="Enter Match Details">
-            
-            <button id="predict-button" class="btn-predict w-full p-3 text-lg font-extrabold rounded-lg flex items-center justify-center" onclick="handlePrediction()">
-                <span id="button-text">🚀 Detailed Analysis Generate Karein (FREE)</span>
-                <div id="loading-spinner" class="w-5 h-5 border-4 rounded-full spinner animate-spin ml-2 hidden"></div>
-            </button>
-            <p class="text-center text-sm text-yellow-400 mt-2">Yeh service hamesha free rahegi.</p>
+        <!-- Search Form -->
+        <form id="prediction-form" class="mb-8">
+            <div class="flex flex-col sm:flex-row gap-3">
+                <input type="text" id="match-query" placeholder="Match ka naam daalen (e.g., IND vs AUS T20)"
+                       class="flex-grow bg-[#1a2230] text-white p-3 rounded-xl border border-gray-600 focus:ring-cyan-500 focus:border-cyan-500 transition duration-150 shadow-inner">
+                <button type="submit" id="predict-button"
+                        class="bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transform transition duration-150 active:scale-95 disabled:bg-gray-500 disabled:shadow-none">
+                    Predict Karo
+                </button>
+            </div>
+        </form>
+
+        <!-- Tier 2: Prediction Report Area (The Cricket Dashboard) -->
+        <div id="prediction-report-container" class="mt-8 border-t-2 border-gray-700/50 pt-6">
+            <h2 id="report-title" class="text-2xl font-bold text-white mb-6 border-l-4 border-green-500 pl-2 hidden">📊 AI Report Dashboard</h2>
+            <div id="prediction-report" class="space-y-6">
+                <!-- Report content will be rendered here -->
+            </div>
         </div>
 
-        <!-- Result Section -->
-        <div id="result-area" class="mt-8 space-y-4">
-            <!-- Prediction results or message will be injected here -->
-        </div>
-        
     </div>
 
+    <!-- Premium Modal (Hidden by default) -->
+    <div id="premium-modal" class="fixed inset-0 z-50 bg-black bg-opacity-90 hidden items-center justify-center p-4 transition-opacity duration-300">
+        <div class="cricket-card rounded-2xl shadow-2xl p-6 w-full max-w-sm border-t-4 border-red-600 transform scale-100">
+            <h3 class="text-2xl font-bold text-red-500 mb-3 flex items-center">🛑 Limit Crossed!</h3>
+            <p class="text-gray-300 mb-5">Aapka free analysis count poora ho chuka hai. Detailed betting report access karne ke liye, premium service unlock karein.</p>
 
-    <!-- Logic Script -->
+            <div class="bg-[#0b111e] p-4 rounded-xl mb-5 border border-gray-700">
+                <p class="text-sm font-semibold text-gray-400 mb-2">UPI Payment ID (Copy & Pay):</p>
+                <div class="flex items-center justify-between">
+                    <span id="upi-id-display" class="text-lg font-mono text-green-400 break-all">muahshi7759@ybl</span>
+                    <button id="copy-upi-btn" class="ml-3 p-2 bg-green-600 rounded-lg hover:bg-green-700 active:scale-95 transition shadow-lg">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" viewBox="0 0 20 20" fill="currentColor"><path d="M7 9a2 2 0 012-2h6a2 2 0 012 2v6a2 2 0 01-2 2H9a2 2 0 01-2-2V9z" /><path d="M5 3a2 2 0 00-2 2v6a2 2 0 002 2V5h8a2 2 0 00-2-2H5z" /></svg>
+                    </button>
+                </div>
+            </div>
+
+            <button onclick="handlePaymentConfirmation()" class="w-full bg-green-500 hover:bg-green-600 text-[#0b111e] font-extrabold py-3 rounded-xl shadow-lg active:scale-95 transition duration-150">
+                ✔️ I Have Paid
+            </button>
+            <button onclick="hidePremiumModal()" class="w-full mt-3 text-gray-400 hover:text-white py-2 transition duration-150 text-sm">
+                Cancel
+            </button>
+        </div>
+    </div>
+
+    <!-- Firebase SDK Imports -->
     <script type="module">
-        
-        // --- CONFIGURATION ---
-        // Kripya AFFILIATE_LINK aur TELEGRAM_LINK ko apne links se badal dein
-        const AFFILIATE_LINK = "https://your-betting-platform.com"; 
-        const TELEGRAM_LINK = "https://t.me/your_telegram_channel"; 
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        window.handlePrediction = handlePrediction;
+        // Global Variables
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        const apiKey = ""; // API Key is automatically handled by the environment
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
 
-        // ✅ FINAL REPLIT BACKEND URL CONFIGURATION
-        // Yeh URL aapka Replit server hai jahan API key secure hai.
-        const REPLIT_BASE_URL = 'https://cricket-predictor-shopmefy1.replit.app/predict'; 
-        const BACKEND_URL = REPLIT_BASE_URL;
+        let app, db, auth;
+        let userId = 'loading';
+        let userStats = { freeCount: 0, isPremium: false }; // State management for monetization
 
-        // --- TELEGRAM INIT ---
-        window.onload = function() {
-            // Check for correct URL format
-            if (BACKEND_URL.includes('cricket-predictor-shopmefy1.replit.app')) {
-                displayMessage("🚨 Backend URL NOT Set. Kripya index.html code mein Replit URL ko '/predict' ke saath daalein.", 'fatal');
-                return;
+        // --- Utility Functions ---
+
+        /** Display status messages in the UI. */
+        const showStatus = (message, type = 'info') => {
+            const statusDisplay = document.getElementById('status-display');
+            let bgColor, textColor, icon;
+
+            switch (type) {
+                case 'error':
+                    bgColor = 'bg-red-900/40 border border-red-700';
+                    textColor = 'text-red-300';
+                    icon = '⚠️';
+                    break;
+                case 'success':
+                    bgColor = 'bg-green-900/40 border border-green-700';
+                    textColor = 'text-green-300';
+                    icon = '✅';
+                    break;
+                default: // info
+                    bgColor = 'bg-cyan-900/40 border border-cyan-700';
+                    textColor = 'text-cyan-300';
+                    icon = 'ℹ️';
             }
 
-            if (window.Telegram && Telegram.WebApp) {
-                Telegram.WebApp.ready();
-                Telegram.WebApp.expand(); 
-                if (Telegram.WebApp.themeParams) {
-                    document.body.style.backgroundColor = Telegram.WebApp.themeParams.bg_color;
-                }
-            }
-            fetchTodayMatches();
+            statusDisplay.className = `p-3 mb-6 rounded-xl text-sm transition-all duration-300 ${bgColor} ${textColor}`;
+            statusDisplay.innerHTML = `<span class="font-bold">${icon} ${type.toUpperCase()}:</span> ${message}`;
+            statusDisplay.style.display = 'block';
         };
 
-        // --- API CALL UTILITY (Now calls your Backend) ---
-        async function fetchWithRetry(payload) {
-            
-            // Replit URL check is not needed here as it's set above
-            if (!BACKEND_URL || BACKEND_URL.includes('cricket-predictor-shopmefy1.replit.app')) {
-                 throw new Error("Backend URL is not configured. Please check index.html file.");
-            }
+        /** Hide status message. */
+        const hideStatus = () => {
+            document.getElementById('status-display').style.display = 'none';
+        };
 
-            const maxRetries = 3;
-            let attempt = 0;
-            
-            while (attempt < maxRetries) {
+        /** Exponential Backoff retry mechanism for API calls. */
+        const fetchWithRetry = async (url, payload, maxRetries = 5) => {
+            const fetchOptions = {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            };
+
+            for (let attempt = 1; attempt <= maxRetries; attempt++) {
                 try {
-                    // Ab hum Replit backend ko call kar rahe hain.
-                    const fetchResponse = await fetch(BACKEND_URL, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
+                    showStatus(`AI analysis shuru: Attempt ${attempt} of ${maxRetries}...`, 'info');
+                    const response = await fetch(url, fetchOptions);
 
-                    if (!fetchResponse.ok) {
-                        let errorDetail = await fetchResponse.json().catch(() => ({}));
-                        let errorMessage = `HTTP error! status: ${fetchResponse.status}.`;
-                        
-                        // Check for the error message sent by your Replit backend
-                        if (errorDetail.error) {
-                            errorMessage += ` Backend Detail: ${errorDetail.error.substring(0, 100)}...`;
-                        } else {
-                            errorMessage += ` Raw response: ${JSON.stringify(errorDetail).substring(0, 50)}...`; 
-                        }
-                        throw new Error(errorMessage);
+                    if (response.ok) {
+                        return await response.json();
                     }
 
-                    return fetchResponse.json(); 
+                    // Handle specific errors for retry
+                    if (response.status === 429 || response.status === 401) {
+                        const errorMsg = response.status === 401 ? '401 Unauthorized: Key issue. Retrying...' : '429 Rate Limit: Waiting for backoff...';
+                        showStatus(`Error ${response.status}: ${errorMsg}`, 'error');
+
+                        if (attempt === maxRetries) throw new Error(`API failed after ${maxRetries} attempts with status ${response.status}`);
+
+                        const delay = Math.pow(2, attempt) * 1000 + (Math.random() * 1000); // 2s, 4s, 8s...
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                        continue;
+                    }
+
+                    // For other non-retryable errors
+                    const errorData = await response.json().catch(() => ({ message: response.statusText }));
+                    throw new Error(`API request failed with status ${response.status}: ${errorData.message}`);
 
                 } catch (error) {
-                    if (attempt === maxRetries - 1) {
-                        throw error;
-                    }
-                    
-                    attempt++;
-                    const delay = Math.pow(2, attempt) * 1000 + Math.random() * 500; 
-                    await new Promise(resolve => setTimeout(resolve, delay));
-                    continue;
+                    if (attempt === maxRetries) throw error;
+                    // If error is not API related but network or parsing, retry logic continues
                 }
             }
-            throw new Error("API request failed after all retries.");
-        }
+        };
 
+        // --- Firebase Setup and Authentication ---
 
-        // --- MATCH LIST FETCH (Calls Backend) ---
-        async function fetchTodayMatches() {
-            
-            const listContainer = document.getElementById('today-matches-list');
-            const statusMessage = document.getElementById('match-list-status');
-            
-            statusMessage.textContent = "Matches ki live list load ho rahi hai...";
-            listContainer.innerHTML = ''; 
-            listContainer.appendChild(statusMessage);
-
-            const systemPrompt = `Aap ek cricket match listing aur quick prediction expert hain. Aapka kaam hai aaj (current date) hone wale sabhi major international aur domestic cricket matches ko Google Search ka use karke dhundhna. Har match ke liye ek quick, statistically-based winning chance (percentage), winner team, aur saath mein ek chota sa teaser bhi dena hai.
-
-            Response ka format strictly plain text mein hona chahiye, har match ek nayi line par aur har field pipe (|) se separated hona chahiye. Sirf data dena hai, koi extra text ya explanation nahi:
-            Match Name | Winning Likelihood (Team A: X%, Team B: Y%) | Winner Team | Teaser Detail (Pitch, Venue short description)
-
-            Example:
-            India vs Pakistan, T20 World Cup | India: 65%, Pakistan: 35% | India | Flat pitch, high boundary factor.
-            England vs Australia, Ashes | England: 48%, Australia: 52% | Australia | Cloudy conditions, early swing likely.`;
-
-            const userQuery = "Aaj ke saare cricket matches, unki winning percentage, kon jeetega aur pitch/venue ka 1-line teaser batao.";
-            
-            const payload = {
-                contents: [{ parts: [{ text: userQuery }] }],
-                tools: [{ "googleSearch": {} }], 
-                systemInstruction: { parts: [{ text: systemPrompt }] },
-            };
-            
-            try {
-                const response = await fetchWithRetry(payload);
-                const candidate = response?.candidates?.[0];
-
-                if (!candidate || !candidate.content?.parts?.[0]?.text) {
-                     throw new Error("API se koi content nahi mila.");
-                }
-
-                const rawText = candidate.content.parts[0].text;
-                const matchLines = rawText.split('\n').filter(line => line.trim().includes('|'));
-                
-                listContainer.innerHTML = ''; 
-                
-                if (matchLines.length === 0) {
-                    listContainer.innerHTML = '<p class="text-center text-sm text-red-400">Aaj koi major match nahi mila ya data abhi update nahi hua hai.</p>';
-                    return;
-                }
-
-                matchLines.forEach(line => {
-                    const parts = line.split('|').map(p => p.trim());
-                    if (parts.length < 4) return; // Skip malformed lines
-
-                    const [matchName, winningLikelihood, winnerTeam, teaserDetail] = parts;
-                    
-                    const matchItem = document.createElement('div');
-                    matchItem.className = 'match-item card p-3 flex flex-col space-y-2';
-                    matchItem.setAttribute('data-match-name', matchName);
-                    matchItem.onclick = () => handlePrediction(matchName); 
-
-                    const winningTeam = winnerTeam || 'N/A';
-                    const likelihoodParts = (winningLikelihood || '').split('/').map(s => s.trim());
-                    
-                    let likelihoodDisplay = likelihoodParts.map(part => {
-                        // Simple check if the winning team's name (first word) is in the likelihood part
-                        const isWinner = winningTeam !== 'N/A' && part.toLowerCase().includes(winningTeam.split(' ')[0].toLowerCase()); 
-                        const colorClass = isWinner ? 'text-green-400 font-extrabold' : 'text-yellow-400 font-semibold';
-                        return `<span class="${colorClass}">${part}</span>`;
-                    }).join(' / ');
-
-
-                    matchItem.innerHTML = `
-                        <div class="flex justify-between items-center w-full">
-                            <div>
-                                <p class="font-bold text-base text-white">${matchName}</p>
-                            </div>
-                            <div class="text-right text-xs font-mono">
-                                ${likelihoodDisplay}
-                            </div>
-                        </div>
-                        <div class="w-full border-t border-gray-600 pt-1">
-                             <p class="text-xs text-gray-400">Expected Winner: <span class="text-green-400 font-bold">${winningTeam}</span></p>
-                             <p class="text-xs text-orange-300 mt-1">📍 Teaser: ${teaserDetail || 'Koi quick info nahi mili.'}</p>
-                        </div>
-                    `;
-                    listContainer.appendChild(matchItem);
-                });
-
-                const instruction = document.createElement('p');
-                instruction.className = 'text-center text-xs text-gray-500 mt-2';
-                instruction.textContent = 'Full Betting Report (Pitch, Key Battles, Toss) ke liye, match par TAP karein.';
-                listContainer.appendChild(instruction);
-
-
-            } catch (error) {
-                console.error("Error fetching or parsing match list:", error);
-                 const errorMessageDiv = `<div class="p-4 rounded-lg bg-red-900 border border-red-400">
-                                            <p class="text-center text-xl font-bold text-red-300">🚨 API/TOOL ERROR</p>
-                                            <p class="text-center text-sm text-red-200 mt-2">Data load nahi ho saka. Kripya **Refresh** karein ya Backend URL check karein.</p>
-                                            <p class="text-center text-xs text-red-500 mt-2">Detail: ${error.message}</p>
-                                          </div>`;
-                listContainer.innerHTML = errorMessageDiv;
-            }
-        }
-        
-        // --- GATEWAY FUNCTION ---
-        function handlePrediction(matchNameFromList = null) {
-
-            const queryInput = document.getElementById('match-query');
-            let query;
-            
-            if (matchNameFromList) {
-                query = matchNameFromList;
-                queryInput.value = matchNameFromList; 
-            } else {
-                query = queryInput.value.trim();
-            }
-
-            if (!query) {
-                displayMessage("Kripya match ka naam enter karein.", 'error');
+        const setupFirebaseAndAuth = async () => {
+            if (!firebaseConfig) {
+                showStatus("Firebase Config nahi mila. App initialize nahi ho sakti.", 'error');
                 return;
             }
-            
-            runPrediction(query);
-        }
-        
-        // --- DETAILED ANALYSIS EXECUTION (Calls Backend) ---
-        async function runPrediction(query) {
-            
-            const loadingSpinner = document.getElementById('loading-spinner');
-            const buttonText = document.getElementById('button-text');
-            const predictButton = document.getElementById('predict-button');
-            
-            // UI State: Loading
-            loadingSpinner.classList.remove('hidden');
-            buttonText.textContent = 'Deep Analysis Ho Rahi Hai...';
-            predictButton.disabled = true;
-            
-            document.getElementById('result-area').innerHTML = '';
-            displayMessage("Gemini AI deep statistical report bana raha hai. Please wait...", 'info');
-            
-            const systemPrompt = `Aap ek world-class cricket match analysis aur statistical prediction expert hain. Aapka kaam hai user ke diye gaye cricket match ke liye ek detailed, objective analysis dena. Aapki analysis ek betting karne wale person ko dhyan mein rakh kar ki jayegi. Aapko woh saare key insights dene hain jo ek expert ko chahiye hote hain.
-            
-            Response ka format strictly JSON hona chahiye.
 
-            Apne analysis mein Google Search se current aur accurate data ka use karein.`;
+            try {
+                // Initialize Firebase Services
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
 
-            const userQuery = `Match: ${query}. Detailed betting analysis report do, jismein pitch, toss, key battles, aur score range ho. Jawab ko JSON format mein do jismein MatchName, OverallWinner, WinningProbability, PitchReport, TossDecisionPrediction, KeyBattles (array of {player1, player2, context}), TopPerformersLikely (object with {Batsmen, Bowlers}), aur FirstInningsScoreRange fields hon.`;
-            
+                // Sign In Logic
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                    document.getElementById('auth-message').textContent = 'Authenticated (Custom)';
+                } else {
+                    await signInAnonymously(auth);
+                    document.getElementById('auth-message').textContent = 'Authenticated (Anonymous)';
+                }
+
+                // Set up Auth State Listener
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        userId = user.uid;
+                    } else {
+                        userId = crypto.randomUUID();
+                    }
+                    document.getElementById('user-id').textContent = userId;
+                    console.log(`User ID set: ${userId}`);
+
+                    if (db) {
+                        setupStatsListener(userId);
+                    }
+                });
+
+            } catch (error) {
+                console.error("Firebase setup ya login mein error:", error);
+                showStatus(`Login failed: ${error.message}. Anonymous sign-in try karein.`, 'error');
+                userId = crypto.randomUUID();
+                document.getElementById('user-id').textContent = userId;
+                document.getElementById('auth-message').textContent = 'Login Failed';
+            }
+        };
+
+        // --- Firestore State Management (Monetization) ---
+
+        const setupStatsListener = (currentUserId) => {
+            const statsRef = doc(db, `/artifacts/${appId}/users/${currentUserId}/stats`, 'user_stats');
+
+            // 1. Check if the document exists, if not, create it
+            const initializeStats = async () => {
+                const initialData = { freeCount: 0, isPremium: false };
+                try {
+                    await setDoc(statsRef, initialData, { merge: true });
+                } catch (e) {
+                    console.error("Error setting initial document:", e);
+                }
+            };
+            initializeStats();
+
+            // 2. Set up real-time listener
+            onSnapshot(statsRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    userStats = docSnap.data();
+                    console.log("User Stats updated:", userStats);
+                } else {
+                    userStats = { freeCount: 0, isPremium: false };
+                }
+            }, (error) => {
+                console.error("Firestore onSnapshot error:", error);
+                showStatus("Error fetching user stats.", 'error');
+            });
+        };
+
+        /** Increments freeCount in Firestore after a successful free prediction. */
+        const incrementFreeCount = async () => {
+            if (!db || userId === 'loading') return;
+            const statsRef = doc(db, `/artifacts/${appId}/users/${userId}/stats`, 'user_stats');
+            try {
+                await updateDoc(statsRef, {
+                    freeCount: userStats.freeCount + 1
+                });
+                showStatus(`Prediction successful! Free count updated to ${userStats.freeCount + 1}.`, 'success');
+            } catch (error) {
+                console.error("Error incrementing freeCount:", error);
+                showStatus("Error updating usage count in Firebase.", 'error');
+            }
+        };
+
+        // --- Monetization Modal Functions ---
+
+        const showPremiumModal = () => {
+            const modal = document.getElementById('premium-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            if (window.Telegram && window.Telegram.WebApp) {
+                 window.Telegram.WebApp.HapticFeedback.notificationOccurred('warning');
+            }
+        };
+
+        const hidePremiumModal = () => {
+            const modal = document.getElementById('premium-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        };
+
+        const copyUpiId = () => {
+            const upiId = document.getElementById('upi-id-display').textContent;
+            const textarea = document.createElement('textarea');
+            textarea.value = upiId;
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand('copy');
+                showStatus("UPI ID copy ho gaya: " + upiId, 'success');
+                if (window.Telegram && window.Telegram.WebApp) {
+                    window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
+                }
+            } catch (err) {
+                showStatus("Copy nahi ho paya. Manual copy karein.", 'error');
+            }
+            document.body.removeChild(textarea);
+        };
+
+        const handlePaymentConfirmation = () => {
+            hidePremiumModal();
+            // Mocking premium access for demo
+            showStatus("Payment confirmation request bhej diya hai. Access jald hi activate ho jayega. (Demo: Premium granted)", 'success');
+
+            const statsRef = doc(db, `/artifacts/${appId}/users/${userId}/stats`, 'user_stats');
+            updateDoc(statsRef, { isPremium: true })
+                .catch(e => console.error("Error setting premium (Demo):", e));
+        };
+        document.getElementById('copy-upi-btn').addEventListener('click', copyUpiId);
+
+
+        // --- Tier 1: Match Listing Logic ---
+
+        const fetchFreeMatchList = async () => {
+            const loadingText = document.getElementById('match-list-loading');
+            loadingText.textContent = 'Loading today\'s major matches...';
+
+            const userQuery = 'List of today\'s major cricket matches for prediction analysis';
+            const systemPrompt = "Aap ek expert cricket match summarizer hain. Aaj ke major matches ke liye ek JSON array mein brief analysis dijiye. Output mein sirf JSON hona chahiye.";
+
             const payload = {
                 contents: [{ parts: [{ text: userQuery }] }],
+                tools: [{ "google_search": {} }],
                 systemInstruction: { parts: [{ text: systemPrompt }] },
                 generationConfig: {
                     responseMimeType: "application/json",
                     responseSchema: {
-                        type: "OBJECT",
-                        properties: {
-                            MatchName: { type: "STRING" },
-                            OverallWinner: { type: "STRING" },
-                            WinningProbability: { type: "STRING" },
-                            PitchReport: { type: "STRING" },
-                            TossDecisionPrediction: { type: "STRING" },
-                            KeyBattles: {
-                                type: "ARRAY",
-                                items: {
-                                    type: "OBJECT",
-                                    properties: {
-                                        player1: { type: "STRING" },
-                                        player2: { type: "STRING" },
-                                        context: { type: "STRING" }
-                                    }
-                                }
+                        type: "ARRAY",
+                        items: {
+                            type: "OBJECT",
+                            properties: {
+                                "matchName": { "type": "STRING", "description": "e.g., India vs Pakistan, World Cup" },
+                                "winningLikelihood": { "type": "STRING", "description": "e.g., Team A: 60%" },
+                                "winnerTeam": { "type": "STRING" },
+                                "teaserDetail": { "type": "STRING", "description": "1-line pitch/venue summary." }
                             },
-                            TopPerformersLikely: {
-                                type: "OBJECT",
-                                properties: {
-                                    Batsmen: { type: "STRING" },
-                                    Bowlers: { type: "STRING" }
-                                }
-                            },
-                            FirstInningsScoreRange: { type: "STRING" }
+                            "propertyOrdering": ["matchName", "winningLikelihood", "winnerTeam", "teaserDetail"]
                         }
                     }
                 }
             };
-            
+
             try {
-                const response = await fetchWithRetry(payload);
-                
-                const candidate = response?.candidates?.[0];
+                const result = await fetchWithRetry(apiUrl, payload);
+                const jsonText = result.candidates?.[0]?.content?.parts?.[0]?.text;
 
-                if (!candidate || !candidate.content?.parts?.[0]?.text) {
-                     throw new Error("Backend se koi content nahi mila.");
+                if (!jsonText) {
+                    throw new Error("API se koi valid JSON response nahi mila.");
                 }
 
-                const jsonText = candidate.content.parts[0].text;
-                let predictionData;
+                const matches = JSON.parse(jsonText);
+                renderMatchList(matches);
 
-                try {
-                    predictionData = JSON.parse(jsonText);
-                } catch (e) {
-                    throw new Error("Backend ka response JSON format mein nahi mila. Response: " + jsonText.substring(0, 50) + "...");
-                }
-                
-                renderPrediction(predictionData);
-
-                displayMessage("Full Betting Report Ready! ✅", 'success');
-                
             } catch (error) {
-                console.error("Prediction Error:", error);
-                
-                const errorMessageDiv = `<div class="p-4 rounded-lg bg-red-900 border border-red-400">
-                                            <p class="text-center text-xl font-bold text-red-300">🚨 PREDICTION FAILED</p>
-                                            <p class="text-center text-sm text-red-200 mt-2">Report generate nahi ho saki. Internet ya server issue.</p>
-                                            <p class="text-center text-xs text-red-500 mt-2">Detail: ${error.message}</p>
-                                          </div>`;
-                document.getElementById('result-area').innerHTML = errorMessageDiv;
+                console.error("Match list fetching mein error:", error);
+                loadingText.textContent = `Error: ${error.message}. Please try a search below.`;
+                showStatus("Match list fetch karne mein problem aayi.", 'error');
+            }
+        };
 
+        const renderMatchList = (matches) => {
+            const container = document.getElementById('match-list-container');
+            container.innerHTML = '';
+            document.getElementById('match-list-loading').style.display = 'none';
+
+            if (matches.length === 0) {
+                container.innerHTML = '<p class="text-gray-400 text-center">Aaj koi major match nahi mila. Search box mein khud daal kar dekhein.</p>';
+                return;
             }
 
-            // UI State: Finished
-            loadingSpinner.classList.add('hidden');
-            buttonText.textContent = '🚀 Detailed Analysis Generate Karein (FREE)';
-            predictButton.disabled = false;
-        }
-
-        function displayMessage(message, type) {
-            const resultArea = document.getElementById('result-area');
-            let messageDiv = document.getElementById('status-message');
-            
-            let targetDiv = (type === 'error' || type === 'info' || type === 'success') ? resultArea : document.getElementById('status-bar');
-
-            if (type === 'error' || type === 'info' || type === 'success') {
-                 if (!messageDiv || !resultArea.contains(messageDiv)) {
-                    messageDiv = document.createElement('div');
-                    messageDiv.id = 'status-message';
-                    messageDiv.classList.add('mt-4', 'p-3', 'rounded-lg', 'text-sm', 'font-medium', 'text-center', 'text-white', 'border', 'border-opacity-30');
-                    resultArea.prepend(messageDiv);
-                 }
-            } else {
-                 messageDiv = document.getElementById('status-bar');
-            }
-
-
-            let bgColor, borderColor;
-            if (type === 'error' || type === 'fatal') {
-                bgColor = 'bg-red-700';
-                borderColor = 'border-red-400';
-            } else if (type === 'info') {
-                bgColor = 'bg-blue-700';
-                borderColor = 'border-blue-400';
-            } else if (type === 'success') {
-                bgColor = 'bg-green-700';
-                borderColor = 'border-green-400';
-            } else {
-                bgColor = 'bg-gray-700';
-                borderColor = 'border-gray-400';
-            }
-            
-            messageDiv.className = `mt-4 p-3 rounded-lg text-sm font-medium text-center text-white border border-opacity-30 ${bgColor} ${borderColor}`;
-            messageDiv.textContent = message;
-
-            if (window.Telegram && Telegram.WebApp) {
-                if (type === 'error' || type === 'fatal') {
-                    Telegram.WebApp.showPopup({
-                        title: 'Prediction Error',
-                        message: message,
-                        buttons: [{id: 'refresh', type: 'default', text: 'Refresh App'}]
-                    }, (buttonId) => {
-                        if (buttonId === 'refresh') {
-                            window.location.reload();
-                        }
-                    });
-                }
-            }
-        }
-
-        function renderPrediction(data) {
-            const resultArea = document.getElementById('result-area');
-            const statusMessage = document.getElementById('status-message');
-            if(statusMessage) { statusMessage.remove(); }
-            
-            resultArea.innerHTML = ''; 
-
-            const winnerTeam = data.OverallWinner || 'N/A';
-            
-            let html = `
-                <h2 class="text-2xl font-extrabold text-red-400 mb-4 section-header">${data.MatchName || 'Match Report'} - FULL BETTING REPORT</h2>
-
-                <!-- WINNER & PROBABILITY -->
-                <div class="card p-4 mb-6 border-l-4 border-green-500 shadow-xl">
-                    <p class="text-xs font-semibold text-gray-400">✅ FREE REPORT (Koi Limit Nahi)</p>
-                    <h3 class="text-3xl font-extrabold text-green-400 mt-1">${winnerTeam}</h3>
-                    <p class="text-sm mt-2 text-white">Odds: <span class="highlight-text">${data.WinningProbability || 'N/A'}</span></p>
-                    <p class="text-xs text-gray-500 mt-2">Yeh prediction saare statistical factors ko dhyan mein rakhkar banayi gayi hai.</p>
-                </div>
-
-                <!-- PITCH, TOSS, SCORE (Full Free Access) -->
-                <div class="card p-4 mb-6 space-y-4">
-                    <div class="border-b border-gray-600 pb-3">
-                        <h4 class="font-bold text-lg text-orange-400">🏟️ PITCH & SCORE ANALYSIS</h4>
-                        <p class="text-sm mt-2 text-gray-300">**Pitch Report:** ${data.PitchReport || 'Pitch report abhi available nahi hai.'}</p>
-                        <p class="text-sm mt-2 font-extrabold text-yellow-300">**Toss Decision Suggestion:** <span class="highlight-text">${data.TossDecisionPrediction || 'N/A'}</span></p>
-                        <p class="text-sm mt-2 font-extrabold text-red-300">**Expected 1st Innings Score:** <span class="highlight-text">${data.FirstInningsScoreRange || 'N/A'}</span></p>
+            matches.forEach(match => {
+                const matchCard = document.createElement('div');
+                matchCard.className = 'match-card bg-[#1a2230] p-4 rounded-xl shadow-lg border-l-4 border-cyan-500 hover:bg-[#202836] transition duration-150 cursor-pointer active:scale-[0.99]';
+                matchCard.innerHTML = `
+                    <h3 class="text-lg font-bold text-white">${match.matchName}</h3>
+                    <p class="text-xs text-gray-400 mt-1">${match.teaserDetail}</p>
+                    <div class="flex justify-between items-center mt-3 pt-2 border-t border-gray-700">
+                        <span class="text-sm font-semibold text-green-400">Winner: ${match.winnerTeam}</span>
+                        <span class="text-xs text-cyan-400 bg-cyan-900/30 px-2 py-1 rounded-full">${match.winningLikelihood}</span>
                     </div>
-                </div>
-                
-                <!-- TOP PERFORMERS -->
-                <div class="card p-4 mb-6 border-l-4 border-yellow-500">
-                    <h3 class="font-bold text-lg text-yellow-400">🌟 FANTASY/KEY PLAYERS</h3>
-                    <div class="mt-2 space-y-2">
-                        <p class="text-sm text-gray-300">🏏 **Batsmen (Top Picks):** ${data.TopPerformersLikely?.Batsmen || 'N/A'}</p>
-                        <p class="text-sm text-gray-300">⚾ **Bowlers (Wicket Takers):** ${data.TopPerformersLikely?.Bowlers || 'N/A'}</p>
-                    </div>
-                </div>
-            `;
-
-            // Key Battles Section
-            if (data.KeyBattles && data.KeyBattles.length > 0) {
-                html += `
-                    <div class="card p-4 mb-6 border-l-4 border-red-500">
-                        <h3 class="font-bold text-lg text-red-400 mb-3">⚔️ KEY BATTLES (Head-to-Head)</h3>
-                        <ul class="space-y-3">
                 `;
-                data.KeyBattles.forEach(battle => {
-                    html += `<li class="p-3 rounded-lg border border-gray-600" style="background-color: #1f2937;">
-                                <span class="font-extrabold text-green-300">${battle.player1 || 'Player 1'}</span> vs <span class="font-extrabold text-yellow-300">${battle.player2 || 'Player 2'}</span>
-                                <p class="text-xs text-gray-400 mt-1">${battle.context || 'Context not available.'}</p>
-                             </li>`;
+                matchCard.addEventListener('click', () => {
+                    document.getElementById('match-query').value = match.matchName;
+                    document.getElementById('prediction-form').dispatchEvent(new Event('submit'));
                 });
-                html += `</ul></div>`;
+                container.appendChild(matchCard);
+            });
+        };
+
+
+        // --- Tier 2: Detailed Prediction Logic ---
+
+        const handlePrediction = async (event) => {
+            event.preventDefault();
+            const query = document.getElementById('match-query').value.trim();
+            const predictButton = document.getElementById('predict-button');
+
+            document.getElementById('prediction-report').innerHTML = '';
+            document.getElementById('report-title').classList.add('hidden');
+            hideStatus();
+
+            if (!query) {
+                showStatus("Kripya match ka naam daalen.", 'error');
+                return;
             }
 
-            // --- CALL TO ACTION / AFFILIATE SECTION ---
-            html += `
-                <h3 class="text-xl font-extrabold text-center text-orange-400 mt-8 mb-4">🏆 Aage Ki Strategy Aur Live Updates</h3>
+            // 1. Monetization Check
+            if (!userStats.isPremium && userStats.freeCount >= 1) {
+                showPremiumModal();
+                return;
+            }
 
-                <!-- Betting Partner Link -->
-                <a href="${AFFILIATE_LINK}" target="_blank" class="w-full inline-block p-4 rounded-xl affiliate-link font-extrabold text-center text-white text-lg mb-4 shadow-xl transition duration-200">
-                    💰 Is Match Par Bet Karein! (Official Partner)
-                </a>
+            // Lock button and show loading
+            predictButton.disabled = true;
+            predictButton.textContent = 'Analyzing...';
+            showStatus(`Analyzing "${query}"... Wait karein, yeh 10-15 seconds le sakta hai.`, 'info');
 
-                <!-- Telegram Group Link -->
-                <a href="${TELEGRAM_LINK}" target="_blank" class="w-full inline-block p-4 rounded-xl bg-blue-600 hover:bg-blue-700 font-extrabold text-center text-white text-lg transition duration-200">
-                    📢 Free Tips & Live Score Updates Ke Liye Group Join Karein
-                </a>
-                <p class="text-center text-xs text-gray-500 mt-2">Sari post-toss analysis aur final report Telegram channel mein share hoti hai.</p>
+            try {
+                // 2. AI Call with Detailed Schema
+                const systemPrompt = "Aap ek world-class cricket betting analyst hain. Aapko live statistical analysis, team news, aur pitch conditions ke aadhar par ek detailed, structured betting prediction report deni hai. Sthir, accurate, aur betting-focused analysis dijiye. Output sirf JSON mein hona chahiye.";
+                const userQuery = `Provide a detailed betting prediction report for the cricket match: ${query}`;
+
+                const payload = {
+                    contents: [{ parts: [{ text: userQuery }] }],
+                    tools: [{ "google_search": {} }],
+                    systemInstruction: { parts: [{ text: systemPrompt }] },
+                    generationConfig: {
+                        responseMimeType: "application/json",
+                        responseSchema: {
+                            type: "OBJECT",
+                            properties: {
+                                "MatchName": { "type": "STRING" },
+                                "OverallWinner": { "type": "STRING" },
+                                "WinningProbability": { "type": "STRING", "description": "e.g., '65% for Team A'" },
+                                "PitchReport": { "type": "STRING", "description": "Detailed 2-3 line pitch analysis." },
+                                "TossDecisionPrediction": { "type": "STRING", "description": "Recommended toss decision (Batting/Bowling) and reason." },
+                                "FirstInningsScoreRange": { "type": "STRING", "description": "Predicted score range for the first innings (e.g., '160-180')." },
+                                "KeyBattles": {
+                                    "type": "ARRAY",
+                                    "items": {
+                                        "type": "OBJECT",
+                                        "properties": {
+                                            "duel": { "type": "STRING", "description": "e.g., 'Virat Kohli vs Jasprit Bumrah'" },
+                                            "analysis": { "type": "STRING", "description": "1-line analysis of this key battle." }
+                                        }
+                                    }
+                                },
+                                "TopPerformersLikely": {
+                                    "type": "ARRAY",
+                                    "items": { "type": "STRING", "description": "Player name." }
+                                }
+                            },
+                            "propertyOrdering": ["MatchName", "OverallWinner", "WinningProbability", "PitchReport", "TossDecisionPrediction", "FirstInningsScoreRange", "KeyBattles", "TopPerformersLikely"]
+                        }
+                    }
+                };
+
+                const result = await fetchWithRetry(apiUrl, payload);
+                const jsonText = result.candidates?.[0]?.content?.parts?.[0]?.text;
+
+                if (!jsonText) {
+                    throw new Error("AI se koi valid detailed report nahi mili.");
+                }
+
+                const report = JSON.parse(jsonText);
+                renderPredictionReport(report);
+
+                // 3. Update Monetization State (only if free)
+                if (!userStats.isPremium) {
+                    await incrementFreeCount();
+                } else {
+                    showStatus("Prediction successful! Premium access use kiya gaya.", 'success');
+                }
+
+            } catch (error) {
+                console.error("Detailed prediction mein error:", error);
+                showStatus(`Analysis mein error: ${error.message}`, 'error');
+            } finally {
+                // Unlock button
+                predictButton.disabled = false;
+                predictButton.textContent = 'Predict Karo';
+            }
+        };
+
+        const renderPredictionReport = (report) => {
+            const container = document.getElementById('prediction-report');
+            document.getElementById('report-title').classList.remove('hidden');
+            
+            // Generate the visually appealing Cricket Dashboard
+            container.innerHTML = `
+                <!-- Dashboard Main Card (Scoreboard Style) -->
+                <div class="cricket-card p-6 rounded-2xl shadow-2xl border-t-8 border-green-500/80">
+                    
+                    <!-- Match Title and Winning Team -->
+                    <div class="text-center mb-6">
+                        <p class="text-sm font-medium text-gray-400">Predicted Winner</p>
+                        <h3 class="text-3xl font-black text-green-400 tracking-wide mt-1">${report.OverallWinner}</h3>
+                        <p class="text-md text-cyan-400 bg-cyan-900/30 inline-block px-3 py-1 rounded-full mt-2">${report.WinningProbability}</p>
+                    </div>
+
+                    <div class="bg-[#0b111e] p-4 rounded-xl mb-6 shadow-inner border border-gray-700">
+                        <p class="text-lg font-bold text-white">${report.MatchName}</p>
+                    </div>
+
+                    <!-- Key Metrics (Pitch, Toss, Score) - Grid Layout -->
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <!-- Pitch Report -->
+                        <div class="bg-[#1a2230] p-3 rounded-lg border border-gray-700">
+                            <p class="text-xs font-semibold text-gray-400 flex items-center mb-1">
+                                🏟️ Pitch Report
+                            </p>
+                            <p class="text-sm text-gray-300 italic line-clamp-2" title="${report.PitchReport}">${report.PitchReport}</p>
+                        </div>
+                        
+                        <!-- Toss Decision -->
+                        <div class="bg-[#1a2230] p-3 rounded-lg border border-gray-700">
+                            <p class="text-xs font-semibold text-gray-400 flex items-center mb-1">
+                                🪙 Toss Prediction
+                            </p>
+                            <p class="text-sm font-semibold text-yellow-400">${report.TossDecisionPrediction}</p>
+                        </div>
+
+                        <!-- First Innings Score Range -->
+                        <div class="col-span-2 bg-[#1a2230] p-3 rounded-lg border border-yellow-700/50">
+                            <p class="text-xs font-semibold text-gray-400 flex items-center mb-1">
+                                🎯 First Innings Score Range
+                            </p>
+                            <p class="text-xl font-black text-yellow-500">${report.FirstInningsScoreRange}</p>
+                        </div>
+                    </div>
+
+                    <!-- Top Performers -->
+                    <div class="mt-6 border-t border-gray-700 pt-4">
+                        <h4 class="text-lg font-bold text-white mb-3 flex items-center">⭐ Top Performers Likely:</h4>
+                        <div class="flex flex-wrap gap-2 max-h-28 overflow-y-auto">
+                            ${report.TopPerformersLikely.map(p => `<span class="bg-green-600/20 text-green-300 text-xs px-3 py-1 rounded-full shadow-md">${p}</span>`).join('')}
+                        </div>
+                    </div>
+                </div> <!-- End of Dashboard Main Card -->
+
+                <!-- Key Battles Section -->
+                <div class="cricket-card p-5 rounded-2xl shadow-xl border-l-4 border-red-500">
+                    <h4 class="text-lg font-bold text-white mb-4 flex items-center">⚔️ Key Battles To Watch:</h4>
+                    <div class="space-y-3">
+                        ${report.KeyBattles.map(battle => `
+                            <div class="bg-[#0b111e] p-3 rounded-lg border-b border-gray-700/50">
+                                <p class="font-medium text-red-400">${battle.duel}</p>
+                                <p class="text-xs text-gray-400 mt-1">${battle.analysis}</p>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+
+                <!-- CTA/Monetization Links -->
+                <div class="flex flex-col gap-3 mt-6 pt-4 border-t border-gray-700">
+                    <a href="https://your-betting-platform.com" target="_blank" class="w-full text-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl shadow-lg transition duration-150 active:scale-[0.98]">
+                        💸 Betting Partner Link (Khelne ke liye Click Karein)
+                    </a>
+                    <a href="https://t.me/your_premium_group" target="_blank" class="w-full text-center bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 rounded-xl shadow-lg transition duration-150 active:scale-[0.98]">
+                        🗣️ Premium Telegram Group Join Karein
+                    </a>
+                </div>
             `;
+            // Scroll to the report to show it immediately
+            document.getElementById('report-title').scrollIntoView({ behavior: 'smooth' });
+        };
 
-            resultArea.innerHTML = html;
-        }
+
+        // --- App Initialization ---
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.Telegram && window.Telegram.WebApp) {
+                window.Telegram.WebApp.ready();
+                window.Telegram.WebApp.expand();
+                window.Telegram.WebApp.setHeaderColor('#0b111e');
+                window.Telegram.WebApp.setBackgroundColor('#0b111e');
+            }
+
+            // Setup Firebase and Auth, then fetch initial data
+            setupFirebaseAndAuth().then(() => {
+                fetchFreeMatchList();
+            });
+
+            // Attach main prediction form submit listener
+            document.getElementById('prediction-form').addEventListener('submit', handlePrediction);
+        });
+
     </script>
 </body>
 </html>
